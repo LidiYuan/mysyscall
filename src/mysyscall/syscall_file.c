@@ -18,14 +18,17 @@ int call_write_x86_64(int fd, const void *buf, size_t count)
 
     if(fd <0 || NULL == buf || count <=0)
         return -1;
-
     asm volatile(
         "movq %1, %%rax\n"
+        "movq $0x1,%%rdi\n"
+        "movq %2,%%rsi\n"
+        "movq %3,%%rdx\n"
         "syscall\n"
         "movq %%rax,%0\n"
        :"=m"(ret)
-       :"r"(nu)
-    );
+       :"r"(nu),"r"(buf),"r"(count)
+    );   
+ 
 
     return (int)ret;
 }
