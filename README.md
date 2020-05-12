@@ -1,0 +1,2 @@
+# mysyscall
+wrap syscall 
