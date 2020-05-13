@@ -26,7 +26,7 @@ int call_write_x86_64(int fd, const void *buf, size_t count)
         "syscall\n"
         "movq %%rax,%0\n"
        :"=m"(ret)
-       :"r"(nu),"r"(buf),"r"(count)
+       :"m"(nu),"m"(buf),"m"(count)
     );   
  
 
