@@ -11,7 +11,7 @@
  *count:     rdx
  *_NR_write: rax
  * */
-int call_write_x86_64(int fd, const void *buf, size_t count)
+static int call_write_x86_64(int fd, const void *buf, size_t count)
 {
     long ret;
     long nu = __NR_write;
@@ -20,13 +20,13 @@ int call_write_x86_64(int fd, const void *buf, size_t count)
         return -1;
     asm volatile(
         "movq %1, %%rax\n"
-        "movq $0x1,%%rdi\n"
+        "movq %4,%%rdi\n"
         "movq %2,%%rsi\n"
         "movq %3,%%rdx\n"
         "syscall\n"
         "movq %%rax,%0\n"
        :"=m"(ret)
-       :"m"(nu),"m"(buf),"m"(count)
+       :"m"(nu),"m"(buf),"m"(count),"m"(fd)
     );   
  
 
@@ -45,6 +45,46 @@ int call_write(int fd, const void *buf, size_t count)
     return 0;
 }
 
+/*
+ *__NR_setxattr: rax
+ *path         :rdi
+ *name         :rsi
+ *value        :rdx
+ *size         :r10
+ *flags        :r8
+ * */
+static int call_setxattr_x86_64(const char *path, const char *name,const void *value, size_t size, int flags)
+{
+    long ret=0;
+    long nu = __NR_setxattr;
+
+    asm volatile (
+                    "mov %1,%%rax\n"
+                    "mov %2,%%rdi\n"
+                    "mov %3,%%rsi\n"
+                    "mov %4,%%rdx\n"
+                    "mov %6,%%r8\n"
+                    "mov %5,%%r10\n"
+                    "syscall\n"
+                    "mov %%rax,%0\n"
+                    :"=m"(ret)
+                    :"m"(nu),"m"(path),"m"(name),"m"(value),"m"(size),"m"(flags)
+                    );
+    return ret;
+
+}
+
+int call_setxattr(const char *path, const char *name,const void *value, size_t size, int flags)
+{
+	if(NULL == path || NULL ==name || '\0' == path[0] || '\0' == name[0])
+            return -1;
+#ifdef __x86_64__        
+    return call_setxattr_x86_64(path,name,value,size,flags);
+#endif
+
+    return 0;	
+	
+}
 
 
 
